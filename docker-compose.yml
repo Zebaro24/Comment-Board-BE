@@ -1,0 +1,38 @@
+services:
+  comment-board-db:
+    image: postgres:18-alpine
+    container_name: comment-board-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -h ${DB_HOST:-comment-board-db} -p ${DB_PORT:-5432} -d ${DB_NAME:-postgres} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  comment-board-be:
+    build: .
+    container_name: comment-board-be
+    restart: unless-stopped
+    environment:
+      DB_HOST: comment-board-db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-postgres}
+    ports:
+      - "8000:8000"
+    depends_on:
+      comment-board-db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

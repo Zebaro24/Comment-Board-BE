@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "comment-board-be"
+version = "0.1.0"
+description = "🗨️ SPA backend for managing threaded comments with Django, PostgreSQL, file uploads, XSS protection, CAPTCHA validation, and Docker deployment."
+authors = ["Zebaro <denok100100@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+django = "^5.2.7"
+django-environ = "^0.12.0"
+psycopg2-binary = "^2.9.11"
+gunicorn = "^23.0.0"
+
+[tool.poetry.group.dev.dependencies]
