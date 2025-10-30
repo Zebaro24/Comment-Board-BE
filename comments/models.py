@@ -1,5 +1,7 @@
 from django.db import models
 
+from comments.utils import get_file_upload_path
+
 
 class Comment(models.Model):
     username = models.CharField(max_length=50)
@@ -29,7 +31,7 @@ class File(models.Model):
 
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='files')
     file_type = models.CharField(max_length=10, choices=FILE_TYPES)
-    file = models.FileField(upload_to='uploads/')
+    file = models.FileField(upload_to=get_file_upload_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
