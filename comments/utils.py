@@ -13,7 +13,7 @@ def resize_image_if_needed(file_obj):
         buf = io.BytesIO()
         image.save(buf, format=image.format)
         return ContentFile(buf.getvalue(), name=file_obj.name)
-    return file_obj
+    return None
 
 def get_file_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1]

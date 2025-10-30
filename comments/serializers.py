@@ -1,8 +1,9 @@
 from django.core.validators import URLValidator, validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
+
+from .file_queue import file_queue
 from .models import Comment, File
-from .utils import resize_image_if_needed
 
 from .validators import validate_allowed_html
 
@@ -25,11 +26,12 @@ class FileSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        file_obj = validated_data['file']
-        if validated_data['file_type'] == 'image':
-            validated_data['file'] = resize_image_if_needed(file_obj)
+        file_instance = super().create(validated_data)
 
-        return super().create(validated_data)
+        if validated_data['file_type'] == 'image':
+            file_queue.add_task(file_instance)
+
+        return file_instance
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -1,6 +1,11 @@
 from django.apps import AppConfig
 
+from comments.file_queue import file_queue
+
 
 class CommentsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'comments'
+
+    def ready(self):
+        file_queue.start()
