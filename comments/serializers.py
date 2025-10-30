@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.core.validators import URLValidator, validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
@@ -82,7 +83,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class RecursiveCommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
-    files = FileSerializer(many=True, read_only=True)
+    files = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -95,3 +96,12 @@ class RecursiveCommentSerializer(serializers.ModelSerializer):
             context=self.context
         )
         return serializer.data
+
+    def get_files(self, obj):
+        key = f'comment_files_{obj.id}'
+        files = cache.get(key)
+        if files is None:
+            files_qs = obj.files.all()
+            files = FileSerializer(files_qs, many=True, context=self.context).data
+            cache.set(key, files, 60)
+        return files
