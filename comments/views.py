@@ -5,7 +5,7 @@ from .pagination import CommentPagination
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().order_by('-created_at')
+    queryset = Comment.objects.filter(parent=None).order_by('-created_at')
     pagination_class = CommentPagination
 
     def get_serializer_class(self):
