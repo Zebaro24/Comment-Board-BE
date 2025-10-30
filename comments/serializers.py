@@ -6,6 +6,7 @@ from .utils import resize_image_if_needed
 
 from .validators import validate_allowed_html
 
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
@@ -75,3 +76,20 @@ class CommentSerializer(serializers.ModelSerializer):
                 file_serializer.save(comment=comment)
 
         return comment
+
+
+class RecursiveCommentSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
+    files = FileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'username', 'email', 'homepage', 'text', 'parent', 'created_at', 'replies', 'files']
+
+    def get_replies(self, obj):
+        serializer = RecursiveCommentSerializer(
+            obj.replies.all(),
+            many=True,
+            context=self.context
+        )
+        return serializer.data
