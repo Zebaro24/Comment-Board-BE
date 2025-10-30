@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'captcha',
+    'rest_framework',
     'comments.apps.CommentsConfig',
 ]
 
