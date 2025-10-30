@@ -28,11 +28,15 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-postgres}
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-secret}
     ports:
       - "8000:8000"
     depends_on:
       comment-board-db:
         condition: service_healthy
+    volumes:
+      - ./media:/app/media
 
 volumes:
   postgres_data:
