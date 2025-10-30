@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.core.validators import URLValidator, validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from captcha.models import CaptchaStore
 
 from .file_queue import file_queue
 from .models import Comment, File
@@ -37,10 +38,12 @@ class FileSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     files = FileSerializer(many=True, read_only=True)
+    captcha = serializers.CharField(write_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'email', 'homepage', 'text', 'parent', 'created_at', 'updated_at', 'files']
+        fields = ['id', 'username', 'email', 'homepage', 'text', 'parent', 'created_at', 'updated_at', 'files',
+                  'captcha']
 
     def validate_username(self, value):
         if not value.isalnum():
@@ -66,7 +69,19 @@ class CommentSerializer(serializers.ModelSerializer):
     def validate_text(self, value):
         return validate_allowed_html(value)
 
+    def validate_captcha(self, value):
+        try:
+            key, response = value.split(':')
+            captcha = CaptchaStore.objects.get(hashkey=key)
+            if captcha.response != response.lower():
+                raise serializers.ValidationError("Invalid CAPTCHA")
+        except:
+            raise serializers.ValidationError("Invalid CAPTCHA format")
+        return value
+
     def create(self, validated_data):
+        validated_data.pop('captcha', None)
+
         request = self.context.get('request')
         comment = Comment.objects.create(**validated_data)
 
